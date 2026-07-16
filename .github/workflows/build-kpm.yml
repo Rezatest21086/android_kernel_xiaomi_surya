@@ -18,9 +18,7 @@ jobs:
 
       - name: Download Clang toolchain
         run: |
-          mkdir -p clang
-          curl -L "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747c.tar.gz" -o clang.tar.gz
-          tar -xzf clang.tar.gz -C clang
+          git clone --depth=1 https://github.com/Kry9toN/clang clang
 
       - name: Integrate SukiSU-Ultra + KPM
         run: |
