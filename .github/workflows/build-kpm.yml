@@ -32,12 +32,11 @@ jobs:
 
       - name: Build kernel
         run: |
-          export PATH="${PWD}/clang/bin:${PATH}"
+          export PATH="${PATH}:${PWD}/clang/bin"
           export ARCH=arm64
           export SUBARCH=arm64
           make O=out ARCH=arm64 surya_defconfig
-          make -j$(nproc --all) O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-android- HOSTCC=/usr/bin/gcc HOSTCXX=/usr/bin/g++ HOSTLD=/usr/bin/ld AR=/usr/bin/ar
-     
+          make -j$(nproc --all) O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-android-
       - name: Package AnyKernel3
         run: |
           git clone https://github.com/osm0sis/AnyKernel3 --depth=1
