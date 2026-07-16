@@ -1,0 +1,54 @@
+name: Build Kernel with KPM
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout kernel source
+        uses: actions/checkout@v4
+
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y bc bison flex libssl-dev libelf-dev \
+            build-essential python3 git curl zip
+
+      - name: Download Clang toolchain
+        run: |
+          mkdir -p clang
+          curl -L "https://android.googlesource.com/platform/prebuilts/clang/host/linux-x86/+archive/refs/heads/master/clang-r487747c.tar.gz" -o clang.tar.gz
+          tar -xzf clang.tar.gz -C clang
+
+      - name: Integrate SukiSU-Ultra + KPM
+        run: |
+          curl -LSs "https://raw.githubusercontent.com/SukiSU-Ultra/SukiSU-Ultra/main/kernel/setup.sh" | bash -s main
+
+      - name: Enable KPM config
+        run: |
+          echo "CONFIG_KPM=y" >> arch/arm64/configs/surya_defconfig
+          echo "CONFIG_KALLSYMS=y" >> arch/arm64/configs/surya_defconfig
+          echo "CONFIG_KALLSYMS_ALL=y" >> arch/arm64/configs/surya_defconfig
+
+      - name: Build kernel
+        run: |
+          export PATH="${PWD}/clang/bin:${PATH}"
+          export ARCH=arm64
+          export SUBARCH=arm64
+          make O=out ARCH=arm64 surya_defconfig
+          make -j$(nproc --all) O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-android-
+
+      - name: Package AnyKernel3
+        run: |
+          git clone https://github.com/osm0sis/AnyKernel3 --depth=1
+          cp out/arch/arm64/boot/Image.gz-dtb AnyKernel3/ || cp out/arch/arm64/boot/Image AnyKernel3/
+          cd AnyKernel3
+          zip -r9 ../surya-kpm-kernel.zip *
+
+      - name: Upload result
+        uses: actions/upload-artifact@v4
+        with:
+          name: surya-kpm-kernel
+          path: surya-kpm-kernel.zip
