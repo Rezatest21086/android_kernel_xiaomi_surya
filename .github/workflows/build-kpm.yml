@@ -36,7 +36,7 @@ jobs:
           export ARCH=arm64
           export SUBARCH=arm64
           make O=out ARCH=arm64 surya_defconfig
-          make -j$(nproc --all) O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-android- HOSTCC=gcc HOSTCXX=g++ HOSTLD=ld
+          make -j$(nproc --all) O=out ARCH=arm64 CC=clang CLANG_TRIPLE=aarch64-linux-gnu- CROSS_COMPILE=aarch64-linux-android- HOSTCC=/usr/bin/gcc HOSTCXX=/usr/bin/g++ HOSTLD=/usr/bin/ld AR=/usr/bin/ar
      
       - name: Package AnyKernel3
         run: |
